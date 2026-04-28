@@ -1,117 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-
-<style>
-
-body{
-margin:0;
-font-family:Arial, sans-serif;
-overflow:hidden;
-}
-
-#card{
-display:flex;
-align-items:center;
-gap:10px;
-padding:10px;
-border-radius:16px;
-box-sizing:border-box;
-height:90px;
-overflow:hidden;
-background:#222;
-color:white;
-}
-
-#cover{
-width:65px;
-height:65px;
-border-radius:10px;
-object-fit:cover;
-flex-shrink:0;
-background:#444;
-}
-
-#content{
-flex:1;
-min-width:0;
-}
-
-#label{
-font-size:10px;
-opacity:0.8;
-letter-spacing:1px;
-}
-
-#track{
-font-size:14px;
-font-weight:bold;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-#artist{
-font-size:12px;
-opacity:0.9;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-#spotifyBtn{
-margin-top:5px;
-display:inline-block;
-padding:4px 10px;
-border-radius:999px;
-font-size:11px;
-text-decoration:none;
-background:#1DB954;
-color:white;
-font-weight:bold;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div id="card">
-
-<img id="cover"
-src="https://lastfm.freetls.fastly.net/i/u/174s/4128a6eb29f94943c9d206c08e625904.jpg">
-
-<div id="content">
-
-<div id="label">
-MAIS OUVIDA DA SEMANA
-</div>
-
-<div id="track">
-Carregando...
-</div>
-
-<div id="artist"></div>
-
-<a id="spotifyBtn" target="_blank">
-Ouvir no Spotify
-</a>
-
-</div>
-
-</div>
-
 <script>
 
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
-/* PASSO 1 — pegar música mais ouvida */
+/* pegar álbum mais ouvido */
 
 fetch(
-`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=1month&limit=1&api_key=${apiKey}&format=json`
+`https://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
 )
 
 .then(res=>res.json())
@@ -119,66 +14,34 @@ fetch(
 .then(data=>{
 
 if(
-!data.toptracks ||
-!data.toptracks.track ||
-data.toptracks.track.length===0
+!data.topalbums ||
+!data.topalbums.album ||
+data.topalbums.album.length===0
 ){
 
 document.getElementById("track")
-.textContent="Nenhuma música encontrada";
+.textContent="Nenhum álbum encontrado";
 
 return;
 
 }
 
-const track=data.toptracks.track[0];
+const album=data.topalbums.album[0];
 
-const name=track.name;
-const artist=track.artist.name;
+const name=album.name;
+const artist=album.artist.name;
 
-/* mostrar texto */
-
-document.getElementById("track")
-.textContent=name;
-
-document.getElementById("artist")
-.textContent=artist;
-
-/* botão Spotify */
-
-const spotifyURL=
-`https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
-
-document.getElementById("spotifyBtn")
-.href=spotifyURL;
-
-/* PASSO 2 — buscar capa */
-
-fetch(
-`https://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(name)}&api_key=${apiKey}&format=json`
-)
-
-.then(res=>res.json())
-
-.then(info=>{
+/* pegar imagem */
 
 let image="";
 
-/* tentar pegar capa do álbum */
+if(album.image){
 
-if(
-info.track &&
-info.track.album &&
-info.track.album.image
-){
+for(let i=album.image.length-1;i>=0;i--){
 
-const images=info.track.album.image;
+if(album.image[i]["#text"]){
 
-for(let i=images.length-1;i>=0;i--){
-
-if(images[i]["#text"]){
-
-image=images[i]["#text"];
+image=album.image[i]["#text"];
 break;
 
 }
@@ -197,7 +60,21 @@ image="https://via.placeholder.com/300";
 
 document.getElementById("cover").src=image;
 
-})
+/* texto */
+
+document.getElementById("track")
+.textContent=name;
+
+document.getElementById("artist")
+.textContent=artist;
+
+/* botão spotify */
+
+const spotifyURL=
+`https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
+
+document.getElementById("spotifyBtn")
+.href=spotifyURL;
 
 })
 
@@ -211,7 +88,3 @@ console.log(error);
 });
 
 </script>
-  
-</body>
-
-</html>
