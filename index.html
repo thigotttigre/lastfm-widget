@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mais Ouvida da Semana</title>
+
+<style>
+body {
+margin:0;
+font-family:sans-serif;
+}
+
+#card {
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 6px 18px rgba(0,0,0,0.3);
+transition:0.4s;
+}
+
+#cover {
+width:100%;
+display:block;
+}
+
+#info {
+padding:12px;
+}
+
+#label {
+font-size:12px;
+opacity:0.8;
+letter-spacing:1px;
+}
+
+#track {
+font-size:16px;
+font-weight:bold;
+margin-top:4px;
+}
+
+#artist {
+font-size:14px;
+opacity:0.9;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="card">
+
+<img id="cover">
+
+<div id="info">
+
+<div id="label">
+MAIS OUVIDA DA SEMANA
+</div>
+
+<div id="track">
+Carregando...
+</div>
+
+<div id="artist"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const user = "hdiasc";
+const apiKey = "c4206856e9aebd869468e0c52b182c14";
+
+const url =
+`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`;
+
+fetch(url)
+.then(r => r.json())
+.then(data => {
+
+const track = data.toptracks.track[0];
+
+const name = track.name;
+const artist = track.artist.name;
+const image = track.image[3]["#text"];
+
+document.getElementById("track").textContent = name;
+document.getElementById("artist").textContent = artist;
+document.getElementById("cover").src = image;
+
+/* Detectar cor dominante */
+
+const img = new Image();
+img.crossOrigin = "Anonymous";
+img.src = image;
+
+img.onload = function(){
+
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = img.width;
+canvas.height = img.height;
+
+ctx.drawImage(img,0,0);
+
+const data = ctx.getImageData(
+0,0,
+canvas.width,
+canvas.height
+).data;
+
+let r=0,g=0,b=0,count=0;
+
+for(let i=0;i<data.length;i+=40){
+
+r += data[i];
+g += data[i+1];
+b += data[i+2];
+
+count++;
+
+}
+
+r = Math.floor(r/count);
+g = Math.floor(g/count);
+b = Math.floor(b/count);
+
+const color = `rgb(${r},${g},${b})`;
+
+document.getElementById("card").style.background = color;
+
+/* Detectar se cor é clara ou escura */
+
+const brightness =
+(r*299 + g*587 + b*114) / 1000;
+
+const textColor =
+brightness > 150
+? "#000"
+: "#fff";
+
+document.getElementById("card")
+.style.color = textColor;
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>
