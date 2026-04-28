@@ -108,11 +108,13 @@ Ouvir no Spotify
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
+/* PASSO 1 — pegar música mais ouvida */
+
 fetch(
 `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
 )
 
-.then(response=>response.json())
+.then(res=>res.json())
 
 .then(data=>{
 
@@ -132,20 +134,51 @@ return;
 const track=data.toptracks.track[0];
 
 const name=track.name;
-
 const artist=track.artist.name;
 
-/* pegar imagem segura */
+/* mostrar texto */
+
+document.getElementById("track")
+.textContent=name;
+
+document.getElementById("artist")
+.textContent=artist;
+
+/* botão Spotify */
+
+const spotifyURL=
+`https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
+
+document.getElementById("spotifyBtn")
+.href=spotifyURL;
+
+/* PASSO 2 — buscar capa */
+
+fetch(
+`https://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(name)}&api_key=${apiKey}&format=json`
+)
+
+.then(res=>res.json())
+
+.then(info=>{
 
 let image="";
 
-if(track.image){
+/* tentar pegar capa do álbum */
 
-for(let i=track.image.length-1;i>=0;i--){
+if(
+info.track &&
+info.track.album &&
+info.track.album.image
+){
 
-if(track.image[i]["#text"]){
+const images=info.track.album.image;
 
-image=track.image[i]["#text"];
+for(let i=images.length-1;i>=0;i--){
+
+if(images[i]["#text"]){
+
+image=images[i]["#text"];
 break;
 
 }
@@ -164,19 +197,7 @@ image="https://via.placeholder.com/300";
 
 document.getElementById("cover").src=image;
 
-document.getElementById("track")
-.textContent=name;
-
-document.getElementById("artist")
-.textContent=artist;
-
-/* botão spotify */
-
-const spotifyURL=
-`https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
-
-document.getElementById("spotifyBtn")
-.href=spotifyURL;
+})
 
 })
 
@@ -185,7 +206,7 @@ document.getElementById("spotifyBtn")
 document.getElementById("track")
 .textContent="Erro ao carregar";
 
-console.log("Erro:",error);
+console.log(error);
 
 });
 
