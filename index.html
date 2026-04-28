@@ -111,7 +111,7 @@ const apiKey="c4206856e9aebd869468e0c52b182c14";
 /* PASSO 1 — pegar música mais ouvida */
 
 fetch(
-`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=5day&limit=1&api_key=${apiKey}&format=json`
+`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=1month&limit=1&api_key=${apiKey}&format=json`
 )
 
 .then(res=>res.json())
