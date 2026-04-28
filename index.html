@@ -2,32 +2,33 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Mais Ouvida da Semana</title>
 
 <style>
 
 body{
 margin:0;
 font-family:sans-serif;
+overflow:hidden;
 }
 
 #card{
-border-radius:16px;
-overflow:hidden;
-transition:0.4s;
 display:flex;
 align-items:center;
-gap:12px;
+gap:10px;
 padding:10px;
+border-radius:16px;
 box-sizing:border-box;
+height:90px;
+overflow:hidden;
 }
 
 #cover{
-width:70px;
-height:70px;
-object-fit:cover;
+width:65px;
+height:65px;
 border-radius:10px;
+object-fit:cover;
 flex-shrink:0;
+background:#ccc;
 }
 
 #content{
@@ -44,7 +45,6 @@ letter-spacing:1px;
 #track{
 font-size:14px;
 font-weight:bold;
-margin-top:2px;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -60,7 +60,7 @@ text-overflow:ellipsis;
 
 #spotifyBtn{
 
-margin-top:6px;
+margin-top:5px;
 
 display:inline-block;
 
@@ -102,8 +102,7 @@ Carregando...
 
 <div id="artist"></div>
 
-<a id="spotifyBtn"
-target="_blank">
+<a id="spotifyBtn" target="_blank">
 Ouvir no Spotify
 </a>
 
@@ -116,10 +115,11 @@ Ouvir no Spotify
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
-const url=
-`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`;
+/* buscar top track */
 
-fetch(url)
+fetch(
+`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
+)
 
 .then(r=>r.json())
 
@@ -131,48 +131,46 @@ const name=track.name;
 
 const artist=track.artist.name;
 
-/* pegar melhor imagem disponível */
+/* pegar imagem válida */
 
 let image="";
 
-for(let i=track.image.length-1;i>=0;i--){
+track.image.forEach(img=>{
 
-if(track.image[i]["#text"]){
+if(img["#text"])
+image=img["#text"];
 
-image=track.image[i]["#text"];
-break;
+});
 
-}
-
-}
-
-/* fallback imagem */
+/* fallback seguro */
 
 if(!image){
 
-image="https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png";
+image="https://via.placeholder.com/300";
 
 }
 
-document.getElementById("track").textContent=name;
-
-document.getElementById("artist").textContent=artist;
-
 document.getElementById("cover").src=image;
 
-/* link spotify */
+document.getElementById("track")
+.textContent=name;
 
-const spotifySearch=
+document.getElementById("artist")
+.textContent=artist;
+
+/* botão spotify */
+
+const spotifyURL=
 `https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
 
-document.getElementById("spotifyBtn").href=
-spotifySearch;
+document.getElementById("spotifyBtn")
+.href=spotifyURL;
 
-/* detectar cor dominante */
+/* cor dominante simples */
 
 const img=new Image();
 
-img.crossOrigin="Anonymous";
+img.crossOrigin="anonymous";
 
 img.src=image;
 
@@ -188,7 +186,7 @@ canvas.height=img.height;
 
 ctx.drawImage(img,0,0);
 
-const data=ctx.getImageData(
+const pixels=ctx.getImageData(
 0,0,
 canvas.width,
 canvas.height
@@ -196,43 +194,36 @@ canvas.height
 
 let r=0,g=0,b=0,count=0;
 
-for(let i=0;i<data.length;i+=40){
+for(let i=0;i<pixels.length;i+=80){
 
-r+=data[i];
-
-g+=data[i+1];
-
-b+=data[i+2];
-
+r+=pixels[i];
+g+=pixels[i+1];
+b+=pixels[i+2];
 count++;
 
 }
 
 r=Math.floor(r/count);
-
 g=Math.floor(g/count);
-
 b=Math.floor(b/count);
 
-const color=`rgb(${r},${g},${b})`;
+const bg=`rgb(${r},${g},${b})`;
 
 document.getElementById("card")
-.style.background=color;
+.style.background=bg;
 
-/* contraste automático */
+/* contraste */
 
 const brightness=
 (r*299+g*587+b*114)/1000;
 
-const textColor=
+document.getElementById("card")
+.style.color=
 brightness>150
 ?"#000"
 :"#fff";
 
-document.getElementById("card")
-.style.color=textColor;
-
-}
+};
 
 })
 
