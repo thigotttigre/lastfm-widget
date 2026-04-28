@@ -108,28 +108,34 @@ Ouvir no Spotify
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
+/* buscar top track da semana */
+
 fetch(
-`https://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
+`https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
 )
 
 .then(r=>r.json())
 
 .then(data=>{
 
-const album=data.topalbums.album[0];
+const track=data.toptracks.track[0];
 
-const name=album.name;
+const name=track.name;
 
-const artist=album.artist.name;
+const artist=track.artist.name;
+
+/* pegar imagem da música */
 
 let image="";
 
-album.image.forEach(img=>{
+track.image.forEach(img=>{
 
 if(img["#text"])
 image=img["#text"];
 
 });
+
+/* fallback se não tiver imagem */
 
 if(!image){
 
@@ -144,6 +150,8 @@ document.getElementById("track")
 
 document.getElementById("artist")
 .textContent=artist;
+
+/* botão spotify direto */
 
 const spotifyURL=
 `https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
@@ -163,7 +171,7 @@ console.log(error);
 });
 
 </script>
-
+  
 </body>
 
 </html>
