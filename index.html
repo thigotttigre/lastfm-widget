@@ -108,8 +108,6 @@ Ouvir no Spotify
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
-/* usar topalbums ao invés de toptracks (mais confiável para capa) */
-
 fetch(
 `https://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
 )
@@ -124,8 +122,6 @@ const name=album.name;
 
 const artist=album.artist.name;
 
-/* imagem segura */
-
 let image="";
 
 album.image.forEach(img=>{
@@ -134,8 +130,6 @@ if(img["#text"])
 image=img["#text"];
 
 });
-
-/* fallback */
 
 if(!image){
 
@@ -151,18 +145,11 @@ document.getElementById("track")
 document.getElementById("artist")
 .textContent=artist;
 
-/* botão spotify */
-
 const spotifyURL=
 `https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
 
 document.getElementById("spotifyBtn")
 .href=spotifyURL;
-
-/* aplicar cor simples */
-
-document.getElementById("card")
-.style.background="#333";
 
 })
 
