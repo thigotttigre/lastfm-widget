@@ -108,15 +108,26 @@ Ouvir no Spotify
 const user="hdiasc";
 const apiKey="c4206856e9aebd869468e0c52b182c14";
 
-/* buscar top track da semana */
-
 fetch(
 `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${user}&period=7day&limit=1&api_key=${apiKey}&format=json`
 )
 
-.then(r=>r.json())
+.then(response=>response.json())
 
 .then(data=>{
+
+if(
+!data.toptracks ||
+!data.toptracks.track ||
+data.toptracks.track.length===0
+){
+
+document.getElementById("track")
+.textContent="Nenhuma música encontrada";
+
+return;
+
+}
 
 const track=data.toptracks.track[0];
 
@@ -124,18 +135,26 @@ const name=track.name;
 
 const artist=track.artist.name;
 
-/* pegar imagem da música */
+/* pegar imagem segura */
 
 let image="";
 
-track.image.forEach(img=>{
+if(track.image){
 
-if(img["#text"])
-image=img["#text"];
+for(let i=track.image.length-1;i>=0;i--){
 
-});
+if(track.image[i]["#text"]){
 
-/* fallback se não tiver imagem */
+image=track.image[i]["#text"];
+break;
+
+}
+
+}
+
+}
+
+/* fallback */
 
 if(!image){
 
@@ -151,7 +170,7 @@ document.getElementById("track")
 document.getElementById("artist")
 .textContent=artist;
 
-/* botão spotify direto */
+/* botão spotify */
 
 const spotifyURL=
 `https://open.spotify.com/search/${encodeURIComponent(name+" "+artist)}`;
@@ -166,7 +185,7 @@ document.getElementById("spotifyBtn")
 document.getElementById("track")
 .textContent="Erro ao carregar";
 
-console.log(error);
+console.log("Erro:",error);
 
 });
 
